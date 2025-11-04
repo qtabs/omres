@@ -575,11 +575,11 @@ def figS2_allregs(z, subjects, rois, conditions):
 			y_text = y_text + 0.07 if significance[roinames[level]][n]=='-' and y_text < 0 else y_text
 			ax.text(.5*(x0+x1), y_text, significance[roinames[level]][n], **sign_options)
 
-	axs[0].legend(loc='lower left')
+	axs[0].legend(loc='lower right')
 
 	# Panel captions
 	for ax, caption in zip(axs, ['A', 'B', 'C']):
-		ax.annotate(caption, xy=(-0.18, 0.99),  xycoords="axes fraction", fontsize=10)
+		ax.annotate(caption, xy=(-0.18, 1.05),  xycoords="axes fraction", fontsize=10)
 
 	plt.subplots_adjust(left=0.07, bottom=0.15, right=0.99, top=0.88, wspace=0.08)
 	fig.set_size_inches(7.5, 1.8)
@@ -832,5 +832,5 @@ fig4_emergence(z, funcloc, subjects, rois, conditions)
 figS2_allregs(z, subjects, rois, conditions)
 figS3_participants(z, subjects, rois, conditions)
 figS4_residuals(z, noise, subjects, rois, conditions)
-# figS5_sweeps(z, funcloc, subjects, rois, conditions)  # Requires sweeps data
+figS5_sweeps(z, funcloc, subjects, rois, conditions)  # Requires sweeps data
 
