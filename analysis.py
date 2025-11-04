@@ -156,7 +156,7 @@ def fig2_omres(z, subjects, rois, conditions):
 					val1 = np.nan
 				contrast_dict['Subject']     += [sub]
 				contrast_dict['Level']       += [roinames[roi[:-1]]]
-				contrast_dict['Hemisphere']  += [roi[-1]]
+				contrast_dict['Hemisphere']  += ['Left' if roi[-1]=='L' else 'Right']
 				contrast_dict[contrast_name] += [contrast]
 				contrast_dict['Val0']        += [val0]
 				contrast_dict['Val1']        += [val1]
@@ -173,7 +173,7 @@ def fig2_omres(z, subjects, rois, conditions):
 		ax.set_xlabel('')
 
 		for roi in rois:
-			roisub = (df.Level==roinames[roi[:-1]]) & (df.Hemisphere==roi[-1])
+			roisub = (df.Level==roinames[roi[:-1]]) & (df.Hemisphere==('Left' if roi[-1]=='L' else 'Right'))
 			x = df.Val0[roisub & df.Val0.notna()]
 			y = df.Val1[roisub & df.Val1.notna()]
 			d[roi][contrast_name] = (np.mean(x) - np.mean(y)) / ((np.std(x)**2 + np.std(y)**2)/2)**.5
@@ -213,6 +213,13 @@ def fig2_omres(z, subjects, rois, conditions):
 	# Titles
 	for ax, contrast_name in zip(axs, contrasts):
 		ax.set_title(contrast_name.split(' ')[0])
+
+	# Remove legend title and position at bottom left
+	for ax in axs:
+		legend = ax.get_legend()
+		if legend is not None:
+			legend.set_title('')
+			ax.legend(loc='lower left')
 
 	# Panel captions
 	for ax, caption in zip(axs, ['A', 'B']):
@@ -390,7 +397,7 @@ def fig4_emergence(z, funcloc, subjects, rois, conditions):
 					contrast = np.nan
 				contrast_dict['Subject']     += [sub]
 				contrast_dict['Level']       += [roinames[roi[:-1]]]
-				contrast_dict['Hemisphere']  += [roi[-1]]
+				contrast_dict['Hemisphere']  += ['Left' if roi[-1]=='L' else 'Right']
 				contrast_dict[contrast_name] += [contrast]
 
 		df = pd.DataFrame(contrast_dict)
@@ -451,6 +458,12 @@ def fig4_emergence(z, funcloc, subjects, rois, conditions):
 				ax.plot([x0, x1], [y1, y1], 'k-', linewidth=0.7)
 				ax.plot([x1, x1], [y1, y0], 'k-', linewidth=0.7)
 				ax.text(x_text, y_text, significance[contrast_name][rois], **sign_options)
+
+	# Remove legend title to show just "Left Right"
+	for ax in axs:
+		legend = ax.get_legend()
+		if legend is not None:
+			legend.set_title('')
 
 	# Panel captions
 	for ax, caption in zip(axs, ['A', 'B', 'C', 'D']):
@@ -575,7 +588,9 @@ def figS2_allregs(z, subjects, rois, conditions):
 			y_text = y_text + 0.07 if significance[roinames[level]][n]=='-' and y_text < 0 else y_text
 			ax.text(.5*(x0+x1), y_text, significance[roinames[level]][n], **sign_options)
 
-	axs[0].legend(loc='lower right')
+	# Position legend at bottom left and remove title
+	legend = axs[0].legend(loc='lower left')
+	legend.set_title('')
 
 	# Panel captions
 	for ax, caption in zip(axs, ['A', 'B', 'C']):
@@ -710,7 +725,7 @@ def figS4_residuals(z, noise, subjects, rois, conditions):
 					contrast = np.nan
 				contrast_dict['Subject']     += [sub]
 				contrast_dict['Level']       += [roinames[roi[:-1]]]
-				contrast_dict['Hemisphere']  += [roi[-1]]
+				contrast_dict['Hemisphere']  += ['Left' if roi[-1]=='L' else 'Right']
 				contrast_dict[contrast_name] += [contrast]
 
 		df = pd.DataFrame(contrast_dict)
@@ -770,6 +785,13 @@ def figS4_residuals(z, noise, subjects, rois, conditions):
 				ax.plot([x0, x1], [y1, y1], 'k-', linewidth=0.7)
 				ax.plot([x1, x1], [y1, y0], 'k-', linewidth=0.7)
 				ax.text(x_text, y_text, significance[contrast_name][rois], **sign_options)
+
+	# Remove legend title and position at bottom left
+	for ax in axs:
+		legend = ax.get_legend()
+		if legend is not None:
+			legend.set_title('')
+			ax.legend(loc='lower left')
 
 	# Panel captions
 	for ax, caption in zip(axs, ['A', 'B', 'C', 'D']):
@@ -832,5 +854,5 @@ fig4_emergence(z, funcloc, subjects, rois, conditions)
 figS2_allregs(z, subjects, rois, conditions)
 figS3_participants(z, subjects, rois, conditions)
 figS4_residuals(z, noise, subjects, rois, conditions)
-figS5_sweeps(z, funcloc, subjects, rois, conditions)  # Requires sweeps data
+# figS5_sweeps(z, funcloc, subjects, rois, conditions)  # Requires sweeps data - not implemented
 
