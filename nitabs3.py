@@ -1041,6 +1041,157 @@ class Tabokoffer(Koffer):
 		confounds_tsv = self.grab({'task':self.tasks[0], 'desc':'confounds', 'extension':'tsv'})
 		print(list(confounds_tsv[0].get_df().columns.values))
 
+	def create_filtered_copy(self, keys, dest_path, new_id=None):
+		"""
+		Create a filtered copy of the current storage with only specified keys.
+
+		This method creates a new koffer storage system at the specified destination,
+		containing only the files associated with the given keys. The new storage
+		maintains the same structure as the original and can be instantiated using
+		the standard Tabokoffer initialization.
+
+		Parameters:
+		-----------
+		keys : list
+			List of keys from self.koffer to include in the filtered copy.
+			Only files associated with these keys will be copied.
+		dest_path : str
+			Destination directory where the filtered koffer will be created.
+			This should be the parent directory (equivalent to self.config.koffer).
+		new_id : str, optional
+			New subject ID for the filtered koffer. If None, uses the current ID.
+			Should not include the 'sub-' prefix (it will be added automatically).
+
+		Returns:
+		--------
+		str : Path to the new koffer directory (e.g., dest_path/sub-{id})
+
+		Example:
+		--------
+		>>> tk = Tabokoffer('config', '01')
+		>>> # Create filtered copy with only beta and residuals data
+		>>> new_path = tk.create_filtered_copy(
+		...     keys=['beta_design1_T1w', 'residuals_design1_T1w'],
+		...     dest_path='/path/to/new/koffer/directory',
+		...     new_id='01_filtered'
+		... )
+		>>> # The filtered copy can now be instantiated:
+		>>> # (After updating config to point to dest_path)
+		>>> # tk_filtered = Tabokoffer('config_new', '01_filtered')
+		"""
+
+		# Determine the ID for the new koffer
+		if new_id is None:
+			new_id = self.ID.replace('sub-', '')
+		else:
+			new_id = new_id.replace('sub-', '')  # Remove prefix if provided
+
+		# Create new koffer directory structure
+		new_koffer_id = f'sub-{new_id}'
+		new_koffer_path = os.path.join(dest_path, new_koffer_id)
+		new_json_path = os.path.join(new_koffer_path, f'{new_koffer_id}.json')
+
+		# Create directory if it doesn't exist
+		if not os.path.exists(new_koffer_path):
+			os.makedirs(new_koffer_path)
+
+		# Filter koffer dictionary to only include specified keys
+		filtered_koffer = {}
+		missing_keys = []
+
+		for key in keys:
+			if key in self.koffer:
+				filtered_koffer[key] = self.koffer[key]
+			else:
+				missing_keys.append(key)
+
+		if missing_keys:
+			print(f'Warning: The following keys were not found in the koffer: {", ".join(missing_keys)}')
+
+		# Copy files and update paths
+		new_koffer = {}
+		for key, value in filtered_koffer.items():
+			# Handle different storage formats (string, list, dict)
+			if isinstance(value, str):
+				new_koffer[key] = self._copy_and_update_path(value, new_koffer_path)
+			elif isinstance(value, list):
+				new_koffer[key] = [self._copy_and_update_path(f, new_koffer_path) for f in value]
+			elif isinstance(value, dict):
+				new_koffer[key] = {}
+				for sess_key, sess_value in value.items():
+					if isinstance(sess_value, str):
+						new_koffer[key][sess_key] = self._copy_and_update_path(sess_value, new_koffer_path)
+					elif isinstance(sess_value, list):
+						new_koffer[key][sess_key] = [self._copy_and_update_path(f, new_koffer_path) for f in sess_value]
+
+		# Save the new JSON file
+		with open(new_json_path, 'w') as f:
+			json.dump(new_koffer, f, sort_keys=True, indent=4)
+
+		print(f'Filtered koffer created at: {new_koffer_path}')
+		print(f'Copied {len(new_koffer)} keys with {self._count_files(new_koffer)} files')
+
+		return new_koffer_path
+
+	def _copy_and_update_path(self, src_path, new_koffer_path):
+		"""
+		Helper method to copy a file and return its new path.
+
+		Parameters:
+		-----------
+		src_path : str
+			Source file path
+		new_koffer_path : str
+			Base path for the new koffer
+
+		Returns:
+		--------
+		str : New file path
+		"""
+		# Get relative path structure from the original koffer
+		rel_path = os.path.relpath(src_path, self.koffer_path)
+		dest_path = os.path.join(new_koffer_path, rel_path)
+
+		# Create subdirectories if needed
+		dest_dir = os.path.dirname(dest_path)
+		if not os.path.exists(dest_dir):
+			os.makedirs(dest_dir)
+
+		# Copy the file
+		if os.path.exists(src_path):
+			shutil.copy2(src_path, dest_path)
+		else:
+			print(f'Warning: Source file not found: {src_path}')
+
+		return dest_path
+
+	def _count_files(self, koffer_dict):
+		"""
+		Helper method to count total number of files in a koffer dictionary.
+
+		Parameters:
+		-----------
+		koffer_dict : dict
+			Koffer dictionary structure
+
+		Returns:
+		--------
+		int : Total number of files
+		"""
+		count = 0
+		for value in koffer_dict.values():
+			if isinstance(value, str):
+				count += 1
+			elif isinstance(value, list):
+				count += len(value)
+			elif isinstance(value, dict):
+				for sess_value in value.values():
+					if isinstance(sess_value, str):
+						count += 1
+					elif isinstance(sess_value, list):
+						count += len(sess_value)
+		return count
+
 
 
 class Godkoffer(Koffer):
