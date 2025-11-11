@@ -1012,6 +1012,25 @@ class Tabokoffer(Koffer):
 
 		return res_sigma
 
+	def export_anonymised_koffer(self):
+
+		anonymous_keys = ['beta_localiser_MNI',
+						  'beta_localiser_T1w',
+						  'beta_omres_MNI',
+						  'beta_omres_T1w',
+						  'conimages_localiser_MNI',
+						  'conimages_localiser_T1w',
+						  'localiser_spmmat',
+						  'omres_spmmat',
+						  'residuals_localiser_MNI',
+						  'residuals_localiser_T1w',
+						  'residuals_omres_MNI',
+						  'residuals_omres_T1w',
+						  'rois_MNI',
+						  'rois_T1w',
+						  'timages_localiser_MNI',
+						  'timages_localiser_T1w']
+	
 	### Validation and visualisation ###
 	def check_logfile_headers(self):
 		for sess in self.sessions:
