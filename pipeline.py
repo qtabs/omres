@@ -6,12 +6,12 @@ import pickle
 
 
 # Parameters
-configmod  = 'omresconfig'
-subjects   = nitabs3.get_all_subs(configmod)
-rois       = ['ICL', 'ICR', 'MGBL', 'MGBR', 'aHGL', 'aHGR']
-conditions = ['std0', 'std1', 'std2', 'om4', 'om5', 'om6']
-nuissance  = ['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z'] + ['csf', 'white_matter']
-
+configmod   = 'omresconfig'
+subjects    = nitabs3.get_all_subs(configmod)
+rois        = ['ICL', 'ICR', 'MGBL', 'MGBR', 'aHGL', 'aHGR']
+conditions  = ['std0', 'std1', 'std2', 'om4', 'om5', 'om6']
+nuissance   = ['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z'] + ['csf', 'white_matter']
+export_path = '/media/tabs/Kibisis/omres/derivatives'
 
 # Storage initialisation
 funcloc_t1w, zscores_t1w, betas_t1w, noise_t1w = dict(), dict(), dict(), dict()
@@ -25,14 +25,14 @@ for s in subjects:
 	tk = nitabs3.Tabokoffer(configmod, s)
 
 	# Preprocessing
-	# tk.check_logfile_headers()
-	# tk.run_fmriprep()
-	# tk.store_reconall_atlas()
+	tk.check_logfile_headers()
+	tk.run_fmriprep()
+	tk.store_reconall_atlas()
 
 	# Estimation
-	# tk.estimate('localiser', nuissance)
-	# tk.estimate_residuals_sigma('localiser', nuissance)
-	# tk.create_analysis_rois()
+	tk.estimate('localiser', nuissance)
+	tk.estimate_residuals_sigma('localiser', nuissance)
+	tk.create_analysis_rois()
 	tk.estimate('omres', nuissance)
 
 	# Extraction
@@ -41,6 +41,9 @@ for s in subjects:
 	zscores_t1w[s] = tk.extract_zscores('omres', 'T1w', conditions, rois)
 	noise_t1w[s]   = tk.extract_residuals_sigma('localiser', 'T1w', rois)
 	
+	# Export for osf
+	tk.export_anonymised_koffer(export_path)
+
 	print(f'\n\n\nSubject{s} took {(time.time()-tt)/60:.1f} minutes\n\n')
 
 
