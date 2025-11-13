@@ -1012,7 +1012,7 @@ class Tabokoffer(Koffer):
 
 		return res_sigma
 
-	def export_anonymised_koffer(self):
+	def export_anonymised_koffer(self, export_path):
 
 		anonymous_keys = ['beta_localiser_MNI',
 						  'beta_localiser_T1w',
@@ -1030,6 +1030,29 @@ class Tabokoffer(Koffer):
 						  'rois_T1w',
 						  'timages_localiser_MNI',
 						  'timages_localiser_T1w']
+
+		new_koffer_path = os.path.join(export_path, self.ID)
+		new_json_path = os.path.join(new_koffer_path, f'{self.ID}.json')
+
+		if not os.path.exists(new_koffer_path):
+			os.makedirs(new_koffer_path)
+
+		anonymous_koffer = dict()
+		for key in anonymous_keys:
+			if key in self.koffer:
+				files = self.read(key)
+				for f in files:
+					relative_path = os.path.relpath(f, self.koffer_path)
+					new_file_path = os.path.join(new_koffer_path, relative_path)
+					if not os.path.exists(os.path.dirname(new_file_path)):
+						os.makedirs(os.path.dirname(new_file_path))
+					shutil.copy(f, new_file_path)
+
+				anonymous_koffer[key] = [os.path.join(new_koffer_path,
+									     os.path.relpath(f, self.koffer_path)) for f in files]
+
+		with open(new_json_path, 'w') as f:
+			json.dump(anonymous_koffer, f, sort_keys=True, indent=4)
 	
 	### Validation and visualisation ###
 	def check_logfile_headers(self):

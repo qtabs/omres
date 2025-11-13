@@ -111,7 +111,7 @@ The pipeline performs:
 
 ## Data Availability
 
-### Available Data
+### Preprocessed Results (Local)
 
 The `results/` folder contains preprocessed derivatives necessary to reproduce all figures and statistics:
 - Beta estimates from first-level GLM analyses
@@ -119,7 +119,40 @@ The `results/` folder contains preprocessed derivatives necessary to reproduce a
 - Z-scored estimates
 - Residual variance estimates
 
-### Unavailable Data
+### First-Level Results (Zenodo)
+
+First-level GLM results (beta images, contrast images, ROIs) for all subjects are publicly available on Zenodo:
+
+**DOI:** [10.5281/zenodo.17603000](https://doi.org/10.5281/zenodo.17603000)
+**URL:** https://zenodo.org/records/17603000
+
+The Zenodo repository contains the complete derivatives folder for all 15 subjects, including:
+- Beta images for all conditions in T1w and MNI space
+- Contrast and t-statistic images
+- Residual images
+- ROI masks (anatomical and functional)
+- JSON metadata files
+
+#### Using the Zenodo Data
+
+The Zenodo data contains all first-level GLM results needed to run the extraction and second-level analyses (lines 39-42 of `pipeline.py`).
+
+After downloading from Zenodo, update the file paths to match your local system:
+
+```python
+import nitabs3
+
+# Relocate koffer to your local path
+nitabs3.relocate_koffer(
+    '/path/in/downloaded/json',  # Path embedded in downloaded JSON files
+    '/your/local/path/koffer',   # Where you actually saved the data
+    mode='verify'                # Update paths without moving files
+)
+```
+
+Then run the extraction steps in `pipeline.py` (lines 39-42) to reproduce the `results/` files, followed by `analysis.py` to generate all figures and tables.
+
+### Raw Data (Unavailable)
 
 Raw fMRI data (structural and functional images) are not publicly available because they contain personally identifiable biometric information and we do not have permission from participants to share them.
 
