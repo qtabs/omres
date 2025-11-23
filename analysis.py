@@ -372,7 +372,7 @@ def fig4_emergence(z, funcloc, subjects, rois, conditions):
 
 	contrasts = {'adaptation std0-std1':     ('std0', 'std1'), 
 				 'omissions om4-std1':       ('om4',  'std1'), 
-				 'sPE om4-om6':              ('om4',  'om6'),
+				 'aPE om4-om6':              ('om4',  'om6'),
 				 'BOLD-sensitivity sound-silence_(localiser)': None}
 
 	p = {cn: dict() for cn in contrasts if 'BOLD' not in cn}
@@ -445,7 +445,7 @@ def fig4_emergence(z, funcloc, subjects, rois, conditions):
 	sign_options = {'fontsize': 6, 'horizontalalignment': 'center' ,'verticalalignment': 'center'}
 
 	x_eps = 0.15
-	sigmark_ys = {'adaptation': [1.1, 0.5], 'omissions': [0.7, 0.6], 'sPE': [0.8, 0.7]}
+	sigmark_ys = {'adaptation': [1.1, 0.5], 'omissions': [0.7, 0.6], 'aPE': [0.8, 0.7]}
 	sigmark_xs = [(0, 1), (1, 2)]
 
 	for ax, contrast_name in zip(axs, contrasts):
@@ -482,7 +482,7 @@ def fig4_emergence(z, funcloc, subjects, rois, conditions):
 	col_rename = {
 		'adaptation (std0-std1)': 'adaptation',
 		'omissions (om4-std1)': 'omissions',
-		'sPE (om4-om6)': 'negative PE'
+		'aPE (om4-om6)': 'negative PE'
 	}
 	df_d = df_d.rename(columns=col_rename)
 	df_p = df_p.rename(columns=col_rename)
@@ -606,7 +606,7 @@ def figS3_participants(z, subjects, rois, conditions):
 
 	levels    = list(dict.fromkeys([r[:-1] for r in rois]))
 	options   = {'errorbar': 'se', 'markersize': 2, 'linewidth': 1.5}
-	contrasts = {'omres': ('om4','std1'), 'sPE': ('om4', 'om6')}
+	contrasts = {'omres': ('om4','std1'), 'aPE': ('om4', 'om6')}
 
 	fig, axs = plt.subplots(len(subjects), len(levels))
 	for sub_n, sub in enumerate(subjects):
@@ -655,9 +655,9 @@ def figS3_participants(z, subjects, rois, conditions):
 				
 				# Writing down significance of contrasts
 				#pvs = f"p_omres = {p['omres'][level]:.2g} ({significance['omres'][level]})\n"
-				#pvs += f"p_sPE  = {p['sPE'][level]:.2g} ({significance['sPE'][level]})"
-				pvs = f"om{significance['omres'][level]}, pe{significance['sPE'][level]}"
-				if np.isnan(p_corr['sPE'][level]):
+				#pvs += f"p_sPE  = {p['aPE'][level]:.2g} ({significance['aPE'][level]})"
+				pvs = f"om{significance['omres'][level]}, aPE{significance['aPE'][level]}"
+				if np.isnan(p_corr['aPE'][level]):
 					 pvs = ''
 				plt.text(0.97, 0.75, pvs, transform=axs[sub_n, level_n].transAxes, **textoptions)
 
@@ -700,7 +700,7 @@ def figS4_residuals(z, noise, subjects, rois, conditions):
 
 	contrasts = {'adaptation (std0-std1)':     ('std0', 'std1'), 
 				 'omissions (om4-std1)':       ('om4',  'std1'), 
-				 'sPE (om4-om6)':              ('om4',  'om6'),
+				 'aPE (om4-om6)':              ('om4',  'om6'),
 				 'residuals noise':    None}
 
 	p = {cn: dict() for cn in contrasts if 'residual' not in cn}
@@ -772,7 +772,7 @@ def figS4_residuals(z, noise, subjects, rois, conditions):
 	sign_options = {'fontsize': 6, 'horizontalalignment': 'center' ,'verticalalignment': 'center'}
 
 	x_eps = 0.15
-	sigmark_ys = {'adaptation': [11.5, 7], 'omissions': [11, 12], 'sPE': [11.5, 12]}
+	sigmark_ys = {'adaptation': [11.5, 7], 'omissions': [11, 12], 'aPE': [11.5, 12]}
 	sigmark_xs = [(0, 1), (1, 2)]
 
 	for ax, contrast_name in zip(axs, contrasts):
@@ -810,7 +810,7 @@ def figS4_residuals(z, noise, subjects, rois, conditions):
 	col_rename = {
 		'adaptation (std0-std1)': 'adaptation',
 		'omissions (om4-std1)': 'omissions',
-		'sPE (om4-om6)': 'negative PE'
+		'aPE (om4-om6)': 'negative PE'
 	}
 	df_d = df_d.rename(columns=col_rename)
 	df_p = df_p.rename(columns=col_rename)
