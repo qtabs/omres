@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import matplotlib.patches as mpatches
+from matplotlib.image import BboxImage
+from matplotlib.transforms import Bbox, TransformedBbox
 import numpy as np
 import seaborn as sns
 import glob
@@ -136,7 +139,14 @@ def fig2_omres(z, subjects, rois, conditions):
 	p = {roi: {contrast_name: np.nan for contrast_name in contrasts} for roi in rois}
 	d = {roi: {contrast_name: np.nan for contrast_name in contrasts} for roi in rois}
 
-	fig, axs = plt.subplots(1, len(contrasts))
+	fig = plt.figure(dpi=600)
+	gs  = gridspec.GridSpec(1, 3, width_ratios=[1.5, 1.5, 0.8])
+	axs = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])]	
+
+	# Third column: colour legend on the left, ROI image on the right
+	gs_roi = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[0, 2], width_ratios=[3, 9])
+	ax_leg = fig.add_subplot(gs_roi[0])
+	ax_roi = fig.add_subplot(gs_roi[1])
 
 	for ax, contrast_name in zip(axs, contrasts):
 
@@ -221,12 +231,45 @@ def fig2_omres(z, subjects, rois, conditions):
 			legend.set_title('')
 			ax.legend(loc='lower left')
 
+
+	# Third panel: ROI image with a colour legend to its left
+	img = plt.imread('./results/rois.png')
+	ax_roi.remove()
+	ax_img = fig.add_axes([0.55, 0, 0.45, 1])   # full height, generous width
+	ax_img.imshow(img, interpolation='none')     # default aspect -> no distortion
+	ax_img.set_anchor('E')                        # pin image to the right of the box
+	ax_img.set_zorder(-1)                          # keep it behind the legend
+	ax_img.axis('off')
+
+	# Legend
+	roi_legend_colors = {'IC': '#d55e00', 'MGB': '#f0e441', 'PAC': '#0072b2'}
+	ax_leg.set_xlim(0, 1)
+	ax_leg.set_ylim(0, 1)
+	ax_leg.axis('off')
+	n_roi = len(roi_legend_colors)
+	ms = fs = 6                    # square side / font size (pt)
+	g_txt = 0.03                   # square -> its own label
+	gaps = [0.14, 0.20]            # square-to-square: IC->MGB, MGB->PAC (tune by hand)
+	# cumulative square positions, centred on 0.5
+	ys = [sum(gaps[:i]) for i in range(len(roi_legend_colors))]
+	y0 = 0.5 - ys[-1] / 2
+	for (name, c), dy in zip(roi_legend_colors.items(), ys):
+		y = y0 + dy
+		ax_leg.plot(-0.85, y, marker='s', ms=ms, mfc=c, mec='k', mew=0.3,
+					transform=ax_leg.transAxes, clip_on=False)
+		ax_leg.text(-0.85, y + g_txt, name, rotation=90, rotation_mode='anchor',
+					ha='left', va='center', fontsize=fs, transform=ax_leg.transAxes)
+	ax_leg.set_zorder(5)
+
+
 	# Panel captions
 	for ax, caption in zip(axs, ['A', 'B']):
-		ax.annotate(caption, xy=(-0.18, 1.05),  xycoords="axes fraction", fontsize=10)
+		ax.annotate(caption, xy=(-0.18, 1.04),  xycoords="axes fraction", fontsize=10)
+	ax_leg.annotate('C', xy=(-1.3, 1.04), xycoords='axes fraction', fontsize=10)
 
-	plt.subplots_adjust(left=0.08, bottom=0.10, right=0.99, top=0.90, wspace=0.28)
-	fig.set_size_inches(7.5, 2.0)
+
+	plt.subplots_adjust(left=0.06, bottom=0.08, right=0.99, top=0.92, wspace=0.28)
+	fig.set_size_inches(9.5, 2.4)
 	# plt.savefig(f'./figures/fig2-omres.svg')
 	plt.savefig(f'./figures/fig2-omres.pdf')
 
@@ -847,12 +890,12 @@ with open(f'./results/noise_t1w.pickle', 'rb') as f:
 
 # Main figures
 fig2_omres(z, subjects, rois, conditions)
-fig3_rois(z, subjects, rois)
-fig4_emergence(z, funcloc, subjects, rois, conditions)
+#fig3_rois(z, subjects, rois)
+#fig4_emergence(z, funcloc, subjects, rois, conditions)
 
 # Supplementary figures
-figS2_allregs(z, subjects, rois, conditions)
-figS3_participants(z, subjects, rois, conditions)
-figS4_residuals(z, noise, subjects, rois, conditions)
+#figS2_allregs(z, subjects, rois, conditions)
+#figS3_participants(z, subjects, rois, conditions)
+#figS4_residuals(z, noise, subjects, rois, conditions)
 # figS5_sweeps(z, funcloc, subjects, rois, conditions)  # Requires sweeps data - not implemented
 
